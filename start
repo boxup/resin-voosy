@@ -3,18 +3,22 @@
 # This command will start the node.js wifi connection manager that sets up
 # Make sudo actually work
 
-set -e
+#set -e
 
 # Set host-name and enable-dbus
-sed -i -e "s@#enable-dbus=yes@enable-dbus=no@" -e "s@#host-name=foo@host-name=$(echo $RESIN_DEVICE_UUID | cut -c1-7)@" /etc/avahi/avahi-daemon.conf
+#sed -i -e "s@#enable-dbus=yes@enable-dbus=no@" -e "s@#host-name=foo@host-name=$(echo $RESIN_DEVICE_UUID | cut -c1-7)@" /etc/avahi/avahi-daemon.conf
 
 # Restart service
-/etc/init.d/avahi-daemon restart
+#/etc/init.d/avahi-daemon restart
 
 npm start
 
 # We run the Python app after the wifi connection has been established
 # and the previous command has exited.
+#/usr/local/bin/diamondd 
+#sleep 600
+#/usr/local/bin/diamondd 
+
 cd ./python-server && python main.py
 
 # If our Python server ever crashed/exited, the following loop will
