@@ -14,12 +14,37 @@ RUN apt-get update && apt-get install -y \
 	python \
 	python-dev \
 	python-dbus \
-	python-pip \
-	&& rm -rf /var/lib/apt/lists/*
+	python-pip
 
+
+
+# diamond app
+RUN apt-get install -y avahi-daemon yasm unzip make g++ \
+	libboost-all-dev libssl-dev libcurl4-openssl-dev \
+	libdb++-dev libgmp-dev libminiupnpc-dev &&\
+	apt-get clean &&\
+	rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /usr/src/dmd &&\ 
+    curl -SL https://github.com/DMDcoin/Diamond/archive/master.zip |\
+    unzip -d /usr/src/dmd &&\
+    mkdir -p /usr/src/dmd/src/obj
+
+WORKDIR /usr/src/dmd/src
+RUN make -f makefile.unix xCPUARCH=armv7l diamondd
+
+COPY /usr/src/dmd/src/diamondd /usr/local/bin
+RUN chmod +x /usr/local/bin/diamondd
+
+
+
+# python app
 COPY ./assets/bind /etc/bind
+WORKDIR /usr/src/app
+COPY package.json ./
 
 RUN mkdir -p /usr/src/app/
+
 WORKDIR /usr/src/app
 
 COPY package.json ./
@@ -34,7 +59,7 @@ COPY . ./
 RUN ./node_modules/.bin/coffee -c ./src
 RUN chmod +x ./start
 
-VOLUME /var/lib/connman
+VOLUME /var/lib/connman /usr/src/dmd
 
 # Here we add the pip Flask package
 RUN pip install flask
